@@ -1,0 +1,4 @@
+reference-readings
+==================
+
+This is a diverse collection of guides, guidelines, references, books, books extracted from Wikipedia and some maybe original material for reading. The works included here can prove really useful for many people, especially those interested in information-processing, knowledge, logic, programming, system programming, artificial intelligence and computer science in general. However, it is not limited to these topics. I'll try to add to it and update it as much as I can in the future. I will also try to add new topics and works as I find them. All works under this repository are licensed either under a CC license or a GPL/LGPL one. The license of each work is indicated in the file representing that work, and sometimes in the directory it belongs to. The licenses themselves will be included in a separate directory for reference purposes. If you have any suggestions, please feel free to comment or send me a note.
