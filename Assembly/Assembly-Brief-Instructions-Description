@@ -1,0 +1,409 @@
+GAS Syntax
+Data transfer instructions
+===============================================================================
+Move
+mov src, dest
+copies the src operand in the dest operand
+src
+  Immediate
+  Register
+  Memory
+dest
+  Register
+  Memory
+-------------------------------------------------
+Data Swap
+xchg src, dest 
+swaps the src operand with the dest operand
+src
+  Register
+  Memory
+dest
+  Register
+  Memory
+-------------------------------------------------
+Move and Extend
+movz src, dest 
+copies the src operand in the dest operand and pads the remaining bits not 
+provided by src with zeros (0). This instruction is useful for copying an
+unsigned small value to a bigger register
+src
+  Immediate
+  Register
+  Memory
+dest
+  Register
+  Memory
+-------------------------------------------------
+movs src, dest 
+opies the src operand in the dest operand and pads the remaining bits not 
+provided by src the sign of src. This instruction is useful for copying 
+a signed small value to a bigger register
+src
+  Immediate
+  Register
+  Memory
+dest
+  Register
+  Memory
+-------------------------------------------------
+Move by Data Size
+movsb
+copies one byte from the location specified in esi to the location 
+specified in edi
+-------------------------------------------------
+movsw
+copies one word (two bytes) from the location specified in esi
+to the location specified in edi
+===============================================================================
+Control Flow
+===============================================================================
+Comparison Instructions
+-------------------------------------------------
+test arg1, arg2 
+performs a bit-wise AND on the two operands and sets the flags, but does not 
+store a result
+-------------------------------------------------
+cmp arg1, arg2 
+performs a subtraction between the two operands and sets the flags, but does 
+not store a result
+-------------------------------------------------
+Jump Instructions
+-------------------------------------------------
+Unconditional Jumps
+jmp loc
+loads EIP with the specified address (i.e. the next instruction executed will 
+be the one specified by jmp)
+-------------------------------------------------
+Jump on Equality
+je loc
+Loads EIP with the specified address, if operands of previous CMP instruction 
+are equal
+-------------------------------------------------
+jne loc
+Loads EIP with the specified address, if operands of previous CMP instruction 
+are not equal
+-------------------------------------------------
+Jump if Greater
+jg loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is greater than the second (performs signed comparison)
+-------------------------------------------------
+jge loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is greater than or equal to the second (performs signed comparison)
+-------------------------------------------------
+ja loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is greater than the second. ja is the same as jg, except that it 
+performs an unsigned comparison
+-------------------------------------------------
+jae loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is greater than or equal to the second. jae is the same as jge, 
+except that it performs an unsigned comparison.
+-------------------------------------------------
+Jump if Less
+jl loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is less than the second (performs signed comparison).
+-------------------------------------------------
+jle loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is less than or equal to the second (performs signed comparison).
+-------------------------------------------------
+jb loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is less than the second. jb is the same as jl, except that is 
+performs an unsigned comparison.
+-------------------------------------------------
+jbe loc
+Loads EIP with the specified address, if first operand of previous CMP 
+instruction is less than or equal to the second. jbe is the same as jle, 
+except that is performs an unsigned comparison.
+-------------------------------------------------
+Jump on Overflow
+jo loc
+Loads EIP with the specified address, if the overflow bit is set on a 
+previous arithmetic expression.
+-------------------------------------------------
+Jump on Zero
+jnz loc
+Loads EIP with the specified address, if the zero bit is not set from 
+a previous arithmetic expression. jnz is identical to jne.
+-------------------------------------------------
+jz loc
+Loads EIP with the specified address, if the zero bit is set from a 
+previous arithmetic expression. jz is identical to je.
+-------------------------------------------------
+Function Calls
+-------------------------------------------------
+call proc
+pushes the value EIP+4 onto the top of the stack, and jumps to the 
+specified location. This is used mostly for subroutines.
+-------------------------------------------------
+ret [val]
+Loads the next value on the stack into EIP, and then pops the stack the 
+specified number of times. If val is not supplied, the instruction will 
+not pop any values off the stack afterreturning
+-------------------------------------------------
+Loop Instructions
+-------------------------------------------------
+loop arg
+The loop instruction decrements ECX and jumps to the address specified by arg 
+unless decrementing ECX caused its value to become zero. For example:
+  mov ecx, 5
+  start_loop:
+  ; the code here would be executed 5 times
+  loop start_loop
+loop does not set any flags.
+-------------------------------------------------
+loopx arg
+These loop instructions decrement ECX and jump to the address specified by arg 
+if their condition is satisfied, unless decrementing ECX caused its value to 
+become zero.
+  loope
+  loopne
+  loopnz
+  loopz
+-------------------------------------------------
+Enter and Leave
+enter arg
+Creates a stack frame with the specified amount of space allocated on the stack
+-------------------------------------------------
+leave
+destroys the current stack frame, and restores the previous frame
+===============================================================================
+Other Control Instructions
+===============================================================================
+hlt
+Halts the processor
+-------------------------------------------------
+nop
+"No Operation". This instruction doesnt do anything, but wastes an instruction 
+cycle in the processor. This instruction is often translated to an XCHG 
+operation with the operands EAX and EAX.
+-------------------------------------------------
+lock
+asserts #LOCK
+-------------------------------------------------
+wait
+waits for the CPU to finish its last calculation
+===============================================================================
+Arithmetic
+===============================================================================
+Arithmetic instructions
+-------------------------------------------------
+Arithmetic instructions take two operands: a destination and a source. The 
+destination must be a register or a memory location. The source may be either a
+memory location, a register, or a constant value. Note that at least one of the
+two must be a register, because operations may not use a memory location as 
+both a source and a destination.
+-------------------------------------------------
+add src, dest 
+This adds src to dest. If you are using the NASM syntax, then the result is 
+stored in the first argument, if you are using the GAS syntax, it is stored in
+the second argument.
+-------------------------------------------------
+sub src, dest 
+Like ADD, only it subtracts source from target instead.
+-------------------------------------------------
+mul arg
+This multiplies "arg" by the value of corresponding byte-length in the A 
+register, see table below.
+operand size	1 byte		2 bytes		4 bytes
+other operand	AL		AX		EAX
+higher part of
+result stored
+in:		AH		DX		EDX
+lower part of
+result stored
+in: 		AL		AX		EAX
+In the second case, the target is not EAX for backward compatibility with code
+written for older processors
+-------------------------------------------------
+imul arg
+As MUL, only signed.
+-------------------------------------------------
+div arg
+This divides the value in the dividend register(s) by "arg", see table below.
+divisor size	1 byte		2 bytes		4 bytes
+dividend	AX		DX:AX		EDX:EAX
+remainder stored 
+in:		AH		DX		EDX
+quotient stored 
+in: 		AL		AX		EAX
+If quotient does not fit into quotient register, arithmetic overflow interrupt
+occurs. All flags are in undefined state after the operation
+-------------------------------------------------
+idiv arg
+As DIV, only signed.
+-------------------------------------------------
+neg arg
+Arithmetically negates the argument (i.e. two's complement negation).
+-------------------------------------------------
+Carry Arithmetic Instructions
+-------------------------------------------------
+adc src, dest 
+Add with carry. Adds src + carry flag to dest, storing result in dest. Usually
+follows a normal add instruction to deal with values twice as large as the size
+of the register
+-------------------------------------------------
+sbb src, dest 
+Subtract with borrow. Subtracts src + carry flag from dest, storing result in 
+dest. Usually follows a normal sub instruction to deal with values twice as 
+large as the size of the register
+-------------------------------------------------
+Increment and Decrement
+-------------------------------------------------
+inc arg
+Increments the register value in the argument by 1. Performs much faster than
+ADD arg, 1.
+-------------------------------------------------
+dec arg
+Decrements the register value in the argument by 1.
+===============================================================================
+Logic
+===============================================================================
+Logical instructions
+-------------------------------------------------
+and src, dest 
+performs a bit-wise AND of the two operands, and stores the result in dest
+-------------------------------------------------
+or src, dest 
+performs a bit-wise OR of the two operands, and stores the result in dest
+-------------------------------------------------
+xor src, dest 
+performs a bit-wise XOR of the two operands, and stores the result in dest
+-------------------------------------------------
+not arg
+performs a bit-wise inversion of arg
+===============================================================================
+Shift and Rotate
+===============================================================================
+Logical Shift Instructions
+-------------------------------------------------
+shr arg
+Logical shifts arg to the right
+-------------------------------------------------
+shl arg
+Logical shift arg to the left
+-------------------------------------------------
+Arithmetic Shift Instructions
+-------------------------------------------------
+In an arithmetic shift, the bits that "slide off the end" disappear. The spaces
+are filled in such a way to preserve the sign of the number being slid. For 
+this reason, Arithmetic Shifts are better suited for signed numbers in two's 
+complement format.
+-------------------------------------------------
+sar arg
+arithmetic shift to the right. spaces are filled with sign bit (to maintain 
+sign of original value).
+-------------------------------------------------
+sal arg
+arithmetic shift to the left. spaces are filled with zeros
+-------------------------------------------------
+Shift With Carry Instructions
+-------------------------------------------------
+scr arg
+shift with carry to the right
+-------------------------------------------------
+scl arg
+shift with carry to the left
+-------------------------------------------------
+Rotate Instructions
+-------------------------------------------------
+In a rotate instruction, the bits that slide off the end of the register are 
+fed back into the spaces.
+-------------------------------------------------
+ror arg
+rotate to the right
+-------------------------------------------------
+rol arg
+rotate to the left
+===============================================================================
+Other Instructions
+===============================================================================
+Stack Instructions
+-------------------------------------------------
+push arg
+This instruction decrements the stack pointer and loads the data specified as 
+the argument into the location pointed to by the stack pointer.
+-------------------------------------------------
+pop arg
+This instruction loads the data stored in the location pointed to by the stack
+pointer into the argument specified and then increments the stack pointer
+-------------------------------------------------
+pushf
+This instruction decrements the stack pointer and then loads the location 
+pointed to by the stack pointer with the contents of the flag register.
+-------------------------------------------------
+popf
+This intruction loads the flag register with the contents of the memory 
+location pointed to by the stack pointer and then increments the contents of 
+the stack pointer.
+-------------------------------------------------
+Flags instructions
+-------------------------------------------------
+Interrupt Flag
+sti
+Sets the interrupt flag. Processor can accept interrupts from peripheral 
+hardware. This flag should be kept set under normal execution.
+-------------------------------------------------
+cli
+Clears the interrupt flag. Hardware interrupts cannot interrupt execution.
+Programs can still generate interrupts, called software interrupts, and change
+the flow of execution. Non-maskable interrupts (NMI) cannot be blocked using 
+this instruction
+-------------------------------------------------
+Direction Flag
+std
+Sets the direction flag. Normally, when using string instructions the data
+pointer gets incremented with each iteration. When the direction flag is set,
+the data pointer is decremented instead.
+-------------------------------------------------
+cld
+clears the direction flag
+-------------------------------------------------
+Carry Flag
+stc
+sets the carry flag
+-------------------------------------------------
+clc
+clears the carry flag
+-------------------------------------------------
+cmc
+Complement the carry flag
+-------------------------------------------------
+Other
+sahf
+Stores the content of AH register into the lower byte of the flag register.
+-------------------------------------------------
+lahf
+Loads the AH register with the contents of the lower byte of the flag register.
+-------------------------------------------------
+I/O Instructions
+-------------------------------------------------
+in src, dest 
+The IN instruction almost always has the operands AX and DX (or EAX and EDX)
+associated with it. DX (src) frequently holds the port address to read, and AX 
+(dest) receives the data from the port. In Protected Mode operating systems,
+the IN instruction is frequently locked, and normal users can't use it in their
+programs.
+-------------------------------------------------
+out src, dest 
+The OUT instruction is very similar to the IN instruction. OUT outputs data
+from a given register (src) to a given output port (dest). In protected mode, 
+the OUT instruction is frequently locked so normal users can't use it
+-------------------------------------------------
+System Instructions
+-------------------------------------------------
+These instructions were added with the Pentium II.
+-------------------------------------------------
+sysenter
+This instruction causes the processor to enter protected system mode.
+-------------------------------------------------
+sysexit
+This instruction causes the processor to leave protected system mode, and enter
+user mode
+-------------------------------------------------
